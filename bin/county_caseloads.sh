@@ -1,16 +1,22 @@
 #!/bin/bash
 
-grep "Oakland,Michigan" ../us-counties.csv | \
-    awk -F',' '{print $1,$5}' | \
-    awk 'BEGIN{c=0}{print $1,($2-c)/1258000*100000;c=$2}' | \
-    xmgrace - -par county.par -autoscale x -hdevice PNG -hardcopy -printfile oakland.png
+function caseload () {
+    county=$1;
+    population=$2;
 
-grep "Cook,Illinois" ../us-counties.csv | \
-    awk -F',' '{print $1,$5}' | \
-    awk 'BEGIN{c=0}{print $1,($2-c)/5150000*100000;c=$2}' | \
-    xmgrace - -par county.par -autoscale x -hdevice PNG -hardcopy -printfile cook.png
+    out=$(echo $county | awk -F',' '{print tolower($1)}').png
 
-grep "Kane,Illinois" ../us-counties.csv | \
-    awk -F',' '{print $1,$5}' | \
-    awk 'BEGIN{c=0}{print $1,($2-c)/532403*100000;c=$2}' | \
-    xmgrace - -par county.par -autoscale x -hdevice PNG -hardcopy -printfile kane.png
+    grep "${county}" ../us-counties.csv | \
+        awk -F',' '{print $1,$5}' | \
+        awk -v p=${population} 'BEGIN{c=0}{print $1,($2-c)/p*100000;c=$2}' > kk
+    awk '{a[NR]=$2; if(NR>=7) {sum=0; for(i=NR-7;i<=NR;i++){sum+=a[i]} print $1,sum/7}}' kk > gg
+    xmgrace kk gg -par county.par -hdevice PNG -hardcopy -printfile ${out}
+    rm -f kk gg
+}
+
+# TODO UPDATE THE x-axis ¯\_(ツ)_/¯
+
+# get the caseloads
+caseload "Oakland,Michigan" 1258000
+caseload "Cook,Illinois" 5150000
+caseload "Kane,Illinois" 532403
