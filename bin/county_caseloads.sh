@@ -3,8 +3,8 @@
 function caseload () {
     county=$1;
     population=$2;
-
-    out=$(echo $county | awk -F',' '{print tolower($1)}').png
+    
+    out=$(echo $county | awk -F',' '{print tolower($1)}' | sed 's/ /_/g').png
 
     grep "${county}" ../us-counties.csv | \
         awk -F',' '{print $1,$5}' | \
@@ -18,5 +18,9 @@ function caseload () {
 
 # get the caseloads
 caseload "Oakland,Michigan" 1258000
+caseload "Wayne,Michigan" 1749000
 caseload "Cook,Illinois" 5150000
 caseload "Kane,Illinois" 532403
+caseload "DuPage,Illinois" 922921
+caseload "Polk,Florida" 724777
+caseload "New York City,New York" 8390000
